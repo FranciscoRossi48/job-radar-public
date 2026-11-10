@@ -1,0 +1,374 @@
+[
+  {
+    "name": "work_permit_is_not_residency",
+    "job": {
+      "title": "Senior Data Engineer (80-100%)",
+      "company": "Limmat Private Bank AG",
+      "location": "Zürich, ZH",
+      "country": "CH",
+      "desc_lang": "en",
+      "description": "## Your tasks\n- Design and operate batch and streaming pipelines on Databricks and Spark\n- Model curated data products with dbt on Snowflake\n- Orchestrate workloads with Airflow on Azure\n\n## Your profile\n- 6+ years as a data engineer, ideally in banking or another regulated industry\n- Expert SQL and Python, strong data modeling skills\n- Fluent English; German is not required\n- Valid Swiss work permit or EU/EFTA citizenship required\n\n## What we offer\nHybrid work (2 days in the office), 27 days of vacation."
+    },
+    "features": {
+      "lang_required": [
+        {
+          "lang": "de",
+          "level": "none",
+          "cefr": null
+        }
+      ],
+      "residency_hard_req": false,
+      "residency_country": null,
+      "onsite_only": false,
+      "seniority": "senior",
+      "role_family": "DE",
+      "stack_match": [
+        "Databricks",
+        "Spark",
+        "dbt",
+        "Snowflake",
+        "Airflow",
+        "Azure",
+        "SQL",
+        "Python",
+        "Data Modeling"
+      ],
+      "red_flags": [],
+      "rationale": "Senior DE in Zurich bank, English only, work permit clause satisfied by EU citizenship, strong stack overlap."
+    },
+    "expect": {
+      "excluded": false,
+      "min_score": 90
+    }
+  },
+  {
+    "name": "must_currently_reside_in_switzerland",
+    "job": {
+      "title": "Data Engineer",
+      "company": "Rhein Pharma Services AG",
+      "location": "Basel, BS",
+      "country": "CH",
+      "desc_lang": "en",
+      "description": "## Requirements\n- 4+ years building ETL pipelines with Python and SQL\n- Experience with AWS and Airflow\n- Fluent English, German is an advantage\n- Candidates must currently reside in Switzerland. We do not offer relocation support.\n\n## About us\nWe support clinical operations for global pharma clients."
+    },
+    "features": {
+      "lang_required": [
+        {
+          "lang": "de",
+          "level": "nice",
+          "cefr": null
+        }
+      ],
+      "residency_hard_req": true,
+      "residency_country": "CH",
+      "onsite_only": false,
+      "seniority": "mid",
+      "role_family": "DE",
+      "stack_match": [
+        "Python",
+        "SQL",
+        "AWS",
+        "Airflow",
+        "ETL"
+      ],
+      "red_flags": [],
+      "rationale": "Good DE fit but requires current residence in Switzerland; German only nice."
+    },
+    "expect": {
+      "excluded": true,
+      "reason": "residency required: CH"
+    }
+  },
+  {
+    "name": "german_c1_required",
+    "job": {
+      "title": "Senior BI Engineer",
+      "company": "Alpina Versicherungen",
+      "location": "Zürich",
+      "country": "CH",
+      "desc_lang": "en",
+      "description": "## Your profile\n- 5+ years in BI development with Power BI and SQL Server\n- Strong data warehouse design skills\n- Fluent German (C1) and English, written and spoken - our business stakeholders work in German\n\n## Your role\n- Own the reporting layer for underwriting and claims"
+    },
+    "features": {
+      "lang_required": [
+        {
+          "lang": "de",
+          "level": "required",
+          "cefr": "C1"
+        }
+      ],
+      "residency_hard_req": false,
+      "residency_country": null,
+      "onsite_only": false,
+      "seniority": "senior",
+      "role_family": "BI",
+      "stack_match": [
+        "Power BI",
+        "SQL"
+      ],
+      "red_flags": [],
+      "rationale": "Senior BI role but fluent German C1 required for stakeholder work; above candidate's B1."
+    },
+    "expect": {
+      "excluded": true,
+      "reason": "de C1 required"
+    }
+  },
+  {
+    "name": "german_nice_to_have",
+    "job": {
+      "title": "Analytics Engineer",
+      "company": "Zugerberg Commodities SA",
+      "location": "Zug",
+      "country": "CH",
+      "desc_lang": "en",
+      "description": "## What you bring\n- 3-5 years as analytics engineer\n- dbt, Snowflake, SQL, Python\n- Excellent English; German is a plus\n\n## Responsibilities\n- Build the semantic layer for trading analytics"
+    },
+    "features": {
+      "lang_required": [
+        {
+          "lang": "de",
+          "level": "nice",
+          "cefr": null
+        }
+      ],
+      "residency_hard_req": false,
+      "residency_country": null,
+      "onsite_only": false,
+      "seniority": "mid",
+      "role_family": "AE",
+      "stack_match": [
+        "dbt",
+        "Snowflake",
+        "SQL",
+        "Python"
+      ],
+      "red_flags": [],
+      "rationale": "Mid analytics engineer in Zug, English working language, German only a plus, solid dbt/Snowflake match."
+    },
+    "expect": {
+      "excluded": false,
+      "min_score": 75,
+      "max_score": 90
+    }
+  },
+  {
+    "name": "fluent_french_geneva",
+    "job": {
+      "title": "Data Engineer",
+      "company": "Banque du Léman SA",
+      "location": "Genève",
+      "country": "CH",
+      "desc_lang": "en",
+      "description": "## Profile\n- 5 years of experience with Python, Spark and SQL\n- Fluent French and English are mandatory\n- Knowledge of private banking is an asset"
+    },
+    "features": {
+      "lang_required": [
+        {
+          "lang": "fr",
+          "level": "required",
+          "cefr": "C1"
+        }
+      ],
+      "residency_hard_req": false,
+      "residency_country": null,
+      "onsite_only": false,
+      "seniority": "senior",
+      "role_family": "DE",
+      "stack_match": [
+        "Python",
+        "Spark",
+        "SQL"
+      ],
+      "red_flags": [],
+      "rationale": "Geneva DE role requiring fluent French; candidate has no French."
+    },
+    "expect": {
+      "excluded": true,
+      "reason": "fr C1 required"
+    }
+  },
+  {
+    "name": "dutch_is_a_plus_onsite",
+    "job": {
+      "title": "Senior Data Engineer",
+      "company": "Grachten Logistics B.V.",
+      "location": "Amsterdam, Noord-Holland",
+      "country": "NL",
+      "desc_lang": "en",
+      "description": "## Requirements\n- 5+ years data engineering with Python, Kafka and Spark\n- Experience with AWS\n- Dutch is a plus but not required\n- This role is 100% on-site at our Amsterdam hub; no remote work"
+    },
+    "features": {
+      "lang_required": [
+        {
+          "lang": "nl",
+          "level": "nice",
+          "cefr": null
+        }
+      ],
+      "residency_hard_req": false,
+      "residency_country": null,
+      "onsite_only": true,
+      "seniority": "senior",
+      "role_family": "DE",
+      "stack_match": [
+        "Python",
+        "Kafka",
+        "Spark",
+        "AWS"
+      ],
+      "red_flags": [],
+      "rationale": "Senior DE in Amsterdam, Dutch optional, fully on-site, good streaming stack overlap."
+    },
+    "expect": {
+      "excluded": false,
+      "min_score": 75,
+      "max_score": 90
+    }
+  },
+  {
+    "name": "junior_senior_combined_title",
+    "job": {
+      "title": "Junior/Senior Data Engineer",
+      "company": "Datenwerk Consulting AG",
+      "location": "Bern",
+      "country": "CH",
+      "desc_lang": "en",
+      "description": "## Your profile\n- 3+ years of experience (we hire at junior and senior level)\n- SQL, Python, Azure Data Factory\n- English required, German B1 helpful"
+    },
+    "features": {
+      "lang_required": [
+        {
+          "lang": "de",
+          "level": "nice",
+          "cefr": "B1"
+        }
+      ],
+      "residency_hard_req": false,
+      "residency_country": null,
+      "onsite_only": false,
+      "seniority": "mid",
+      "role_family": "DE",
+      "stack_match": [
+        "SQL",
+        "Python",
+        "Azure"
+      ],
+      "red_flags": [],
+      "rationale": "Combined junior/senior DE opening in Bern; English required, German B1 helpful; mid-level."
+    },
+    "expect": {
+      "excluded": false,
+      "min_score": 70,
+      "max_score": 85
+    }
+  },
+  {
+    "name": "description_in_german",
+    "job": {
+      "title": "Data Engineer (m/w/d)",
+      "company": "Ostschweizer Kantonalbank",
+      "location": "St. Gallen",
+      "country": "CH",
+      "desc_lang": "de",
+      "description": "## Ihre Aufgaben\n- Aufbau und Betrieb von Datenpipelines mit Python und SQL\n- Weiterentwicklung unseres Data Warehouse\n\n## Ihr Profil\n- Mehrjährige Erfahrung als Data Engineer\n- Erfahrung mit Azure und Power BI\n- Teamfähigkeit und Eigeninitiative"
+    },
+    "features": {
+      "lang_required": [
+        {
+          "lang": "de",
+          "level": "required",
+          "cefr": null
+        }
+      ],
+      "residency_hard_req": false,
+      "residency_country": null,
+      "onsite_only": false,
+      "seniority": "mid",
+      "role_family": "DE",
+      "stack_match": [
+        "Python",
+        "SQL",
+        "Azure",
+        "Power BI"
+      ],
+      "red_flags": [],
+      "rationale": "Ad written in German without stated working language; German implied; mid DE with Azure/Power BI overlap."
+    },
+    "expect": {
+      "excluded": false,
+      "min_score": 60,
+      "max_score": 80
+    }
+  },
+  {
+    "name": "luxembourg_french_mandatory",
+    "job": {
+      "title": "BI Developer",
+      "company": "Kirchberg Fund Services S.A.",
+      "location": "Luxembourg",
+      "country": "LU",
+      "desc_lang": "en",
+      "description": "## Your profile\n- 4+ years with Power BI, SQL Server and SSIS\n- French is mandatory; Luxembourgish is an asset\n- Good English"
+    },
+    "features": {
+      "lang_required": [
+        {
+          "lang": "fr",
+          "level": "required",
+          "cefr": null
+        },
+        {
+          "lang": "lb",
+          "level": "nice",
+          "cefr": null
+        }
+      ],
+      "residency_hard_req": false,
+      "residency_country": null,
+      "onsite_only": false,
+      "seniority": "mid",
+      "role_family": "BI",
+      "stack_match": [
+        "Power BI",
+        "SQL"
+      ],
+      "red_flags": [],
+      "rationale": "Luxembourg BI developer role with mandatory French; candidate has none."
+    },
+    "expect": {
+      "excluded": true,
+      "reason": "fr B2 required"
+    }
+  },
+  {
+    "name": "local_candidates_only_nl",
+    "job": {
+      "title": "Lead Data Engineer",
+      "company": "Polder Energy N.V.",
+      "location": "Rotterdam",
+      "country": "NL",
+      "desc_lang": "en",
+      "description": "## Requirements\n- 8+ years in data engineering, 2+ leading a team\n- Databricks, Spark, Python\n- English required\n- Only applicants already living in the Netherlands will be considered (no relocation)"
+    },
+    "features": {
+      "lang_required": [],
+      "residency_hard_req": true,
+      "residency_country": "NL",
+      "onsite_only": false,
+      "seniority": "lead",
+      "role_family": "DE",
+      "stack_match": [
+        "Databricks",
+        "Spark",
+        "Python"
+      ],
+      "red_flags": [],
+      "rationale": "Strong lead DE fit but restricted to candidates already living in the Netherlands."
+    },
+    "expect": {
+      "excluded": true,
+      "reason": "residency required: NL"
+    }
+  }
+]

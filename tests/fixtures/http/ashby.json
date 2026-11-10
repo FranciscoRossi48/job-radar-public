@@ -1,0 +1,7 @@
+{"apiVersion": "1", "jobs": [
+  {"id": "u-1", "title": "Senior Data Engineer", "location": "Amsterdam", "secondaryLocations": [],
+   "isListed": true, "publishedAt": "2026-10-01T07:40:12.278+00:00", "jobUrl": "https://jobs.ashbyhq.com/acme/u-1",
+   "address": {"postalAddress": {"addressCountry": "Netherlands"}},
+   "descriptionHtml": "<h2>What you bring</h2><p>Spark, Airflow</p>", "descriptionPlain": "What you bring Spark, Airflow"},
+  {"id": "u-2", "title": "Data Analyst", "location": "Amsterdam", "isListed": false, "jobUrl": "x", "descriptionPlain": "hidden"}
+]}

@@ -1,0 +1,35 @@
+[
+ {
+  "id": 7465678,
+  "date_gmt": "2026-11-05T19:39:59",
+  "link": "https://www.rmgroup.ch/job/data-engineer-snowflake-24823/",
+  "title": {
+   "rendered": "Data Engineer &#8211; Snowflake"
+  },
+  "content": {
+   "rendered": "<ul class=\"matador-job-meta\"> <li class=\"matador-job-meta-field matador-job-field-job_general_location matador-job-field-value-x\"> <span class=\"matador-job-meta-label\">Location:</span> <span class=\"matador-job-meta-value\">Zurich, Z&uuml;rich (de)</span> </li></ul><p>For our Zurich based client we look for a Data Engineer.</p><ul><li>5+ years with Snowflake and dbt</li></ul>"
+  }
+ },
+ {
+  "id": 7465001,
+  "date_gmt": "2026-11-01T10:00:00",
+  "link": "https://www.rmgroup.ch/job/bi-developer-24700/",
+  "title": {
+   "rendered": "BI Developer"
+  },
+  "content": {
+   "rendered": "<ul class=\"matador-job-meta\"> <li class=\"matador-job-meta-field matador-job-field-job_general_location matador-job-field-value-x\"> <span class=\"matador-job-meta-label\">Location:</span> <span class=\"matador-job-meta-value\">Luxemburg</span> </li></ul><p>Power BI for a client in Luxembourg.</p>"
+  }
+ },
+ {
+  "id": 7464000,
+  "date_gmt": "2026-10-20T08:00:00",
+  "link": "https://www.rmgroup.ch/job/sql-24600/",
+  "title": {
+   "rendered": "SQL Developer"
+  },
+  "content": {
+   "rendered": "<p>No location block.</p>"
+  }
+ }
+]

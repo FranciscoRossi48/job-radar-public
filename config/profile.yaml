@@ -1,0 +1,53 @@
+# Perfil corto que se manda al LLM. Nunca el CV completo. Es un ejemplo: reemplazalo por el tuyo
+# (los tests usan estos idiomas y este stack).
+summary: >
+  Data Engineer / BI Lead, 5+ years in regulated banking and pharma. Builds data
+  pipelines, warehouses and BI layers; leads small teams. EU citizen, no sponsorship
+  needed. Lives in Switzerland and will relocate to any Swiss city for a good offer.
+  Looking only in Switzerland. German B1; English is the working language they are
+  looking for. Spanish native: a role that asks for Spanish is a plus.
+
+# Niveles CEFR. Un idioma ausente equivale a "ninguno".
+languages:
+  es: C2   # nativo
+  en: C1
+  de: B1
+
+# Países donde ya residís (ISO-2). Agregá CH después de mudarte: "must currently live in
+# Switzerland" deja de excluir los avisos suizos (solo hace falta `rescore`).
+residency_countries: [CH]
+
+# Tecnologías de tu perfil. AJUSTÁ ESTA LISTA: alimenta stack_match y el bonus.
+stack:
+  - SQL
+  - Python
+  - dbt
+  - Spark
+  - Databricks
+  - Snowflake
+  - Airflow
+  - Azure
+  - AWS
+  - Power BI
+  - Tableau
+  - Kafka
+  - Data Modeling
+  - ETL
+  - GCP
+  - BigQuery
+  - Dataflow
+  - Cloud Composer
+  - Dataform
+  - Looker
+  - DAX
+  - SSIS
+  - Azure Purview
+
+# Otras formas de escribir una tecnología del stack. El scoring busca el stack también en el
+# texto del aviso (determinístico), además de lo que extrae el LLM.
+stack_aliases:
+  GCP: [Google Cloud, Google Cloud Platform]
+  Power BI: [PowerBI]
+  Azure Purview: [Microsoft Purview, Purview]
+  Data Modeling: [data modelling, dimensional modeling, dimensional modelling, Data Vault]
+  Spark: [PySpark]

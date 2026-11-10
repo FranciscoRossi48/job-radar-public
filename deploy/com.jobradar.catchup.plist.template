@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  Corrida de rescate: solo evalúa lo que quedó pendiente (sin ingestar) y agrega al CSV del
+  día. Plantilla: no la copies a mano; deploy/install.sh reemplaza __UV__, __ROOT__, __HOUR__ y
+  __MINUTE__ y la instala en ~/Library/LaunchAgents/com.jobradar.catchup.plist.
+  Si la Mac está dormida a esa hora, launchd la corre al despertar.
+-->
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>com.jobradar.catchup</string>
+
+  <key>ProgramArguments</key>
+  <array>
+    <string>__UV__</string>
+    <string>--directory</string>
+    <string>__ROOT__</string>
+    <string>run</string>
+    <string>job-radar</string>
+    <string>run-daily</string>
+    <string>--skip-ingest</string>
+    <string>--no-log-console</string>
+  </array>
+
+  <key>WorkingDirectory</key>
+  <string>__ROOT__</string>
+
+  <key>EnvironmentVariables</key>
+  <dict>
+    <key>PATH</key>
+    <string>/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin</string>
+  </dict>
+
+  <key>StartCalendarInterval</key>
+  <dict>
+    <key>Hour</key>
+    <integer>__HOUR__</integer>
+    <key>Minute</key>
+    <integer>__MINUTE__</integer>
+  </dict>
+
+  <!-- Los logs de la app van a logs/job-radar.log (JSON, rotado). Acá solo queda lo que
+       escape del logging (ej. un error al arrancar). -->
+  <key>StandardOutPath</key>
+  <string>__ROOT__/logs/launchd-catchup.out.log</string>
+  <key>StandardErrorPath</key>
+  <string>__ROOT__/logs/launchd-catchup.err.log</string>
+
+  <key>RunAtLoad</key>
+  <false/>
+  <key>ProcessType</key>
+  <string>Background</string>
+  <key>LowPriorityIO</key>
+  <true/>
+</dict>
+</plist>

@@ -1,0 +1,6 @@
+{"offers": [
+  {"id": 501, "title": "Data Engineer", "status": "published", "careers_url": "https://careers.acme.nl/o/data-engineer",
+   "location": "Amsterdam, Noord-Holland, Netherlands", "country_code": "NL", "published_at": "2026-10-13 10:58:56 UTC",
+   "description": "<p>We build a bank.</p>", "requirements": "<ul><li>Python</li></ul>"},
+  {"id": 502, "title": "Data Engineer", "status": "draft", "careers_url": "x", "country_code": "NL", "description": ""}
+]}

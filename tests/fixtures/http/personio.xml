@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<workzag-jobs>
+<position>
+    <id>9001</id>
+    <subcompany>Acme AG</subcompany>
+    <office>Zürich</office>
+    <name>Senior Data Engineer</name>
+    <jobDescriptions>
+        <jobDescription>
+            <name>Your profile</name>
+            <value><![CDATA[<ul><li>dbt</li><li>German is a plus</li></ul>]]></value>
+        </jobDescription>
+    </jobDescriptions>
+    <createdAt>2026-10-01T10:00:00+00:00</createdAt>
+</position>
+<position>
+    <id>9002</id>
+    <office>Munich</office>
+    <name>Data Engineer</name>
+    <jobDescriptions/>
+</position>
+</workzag-jobs>

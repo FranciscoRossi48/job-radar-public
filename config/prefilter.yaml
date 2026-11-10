@@ -1,0 +1,186 @@
+title:
+  # Palabras completas (\b...\b, sin distinguir mayúsculas). Si alguna aparece, el aviso se excluye.
+  exclude_words:
+    - interns?
+    - internships?
+    - praktikum
+    - praktikant(?:in|innen|en)?
+    - werkstudent(?:in|innen|en)?
+    - trainees?
+    - stagiair(?:e|es|s)?
+    - juniors?
+    - apprentices?
+    - apprenticeships?
+    - lernende[rn]?    # aprendices en Suiza
+    - lehrling(?:e)?
+    - stage            # nunca matchea staging/backstage; "early-stage" se ignora (ver abajo)
+  # Fragmentos que se borran del título ANTES de aplicar exclude_words.
+  # Evitan excluir "Junior/Senior", "Medior/Senior", "early-stage", etc.
+  neutralize:
+    - '\bjunior\s*(?:[/|&+-]|or|to|bis)\s*(?:senior|medior|mid(?:-level)?|experienced|lead)\b'
+    - '\b(?:senior|medior|mid(?:-level)?|experienced)\s*(?:[/|&+-]|or|to|bis)\s*junior\b'
+    - '\b(?:early|late|growth|seed|scale)[- ]stage\b'
+  # Si la lista no está vacía, el título debe matchear al menos un patrón para pasar.
+  include_any:
+    - '\bdata\b'
+    - '\bdaten'
+    - '\bbi\b'
+    - 'business intelligence'
+    - '\banalytic'
+    - '\bdwh\b'
+    - 'data ?warehouse'
+    - '\betl\b'
+    - '\bdbt\b'
+    - 'power ?bi'
+    - '\btableau\b'
+    - '\breporting\b'
+    - '\binsights?\b'
+    # Tecnologías: un título que nombra la plataforma de datos también es relevante.
+    - '\bfoundry\b'
+    - '\bdatabricks\b'
+    - '\bsnowflake\b'
+    - '\bspark\b'
+    - '\bfabric\b'
+    - '\bqlik\b'
+    - '\blakehouse\b'
+    # Roles vecinos: pasan al LLM, y scoring.yaml (adjacent_role) exige stack para llegar al CSV.
+    - '\b(?:ai|ki|ml|genai)\b.{0,30}\b(?:engineer|engineering|developer|scientist|architect)\b'
+    - 'machine learning'
+    - '\bml ?ops\b'
+    - '\b(?:business|product|systems?|technical|it|process|pricing|quantitative)\s+analyst\b'
+    - '\b(?:solutions?|cloud)\s+architect\b'
+    - '\b(?:cloud|platform)\s+engineer\b'
+    - '\bdatabase\b'
+    - '\bsql\b'
+    # Sin \bpython\b: los títulos de backend/Python puro se descartaban todos (nov 2026).
+
+description:
+  # Avisos redactados enteros en estos idiomas se excluyen en el prefiltro.
+  exclude_langs: [fr, nl]
+  # Idiomas que considera el detector (ISO 639-1).
+  detect_langs: [en, de, fr, nl, it]
+  # Avisos redactados en alemán (desc_lang = de) que piden alemán por encima de tu nivel:
+  # se excluyen sin llamar al LLM (motivo desc_lang:de_high). Si a pocos caracteres del
+  # match aparece una frase de "nice to have", no se excluye.
+  de_high_level:
+    patterns:
+      - 'mindestens\s+(?:Niveau\s+)?C[12]\b'
+      - '\bC[12][- ]?Niveau\b'
+      - '\bDeutsch\w*[^.\n]{0,30}?\b(?:B2|C1|C2)\b'
+      - '\b(?:B2|C1|C2)\b[^.\n]{0,30}?\bDeutsch'
+      - '\bsehr\s+gute\w*\s+Deutsch'
+      - '(?:verhandlungssicher|flie(?:ß|ss)end|stilsicher|einwandfrei|exzellent|muttersprachlich)\w*[^.\n]{0,40}?\bDeutsch'
+      - '\bDeutsch\w*[^.\n]{0,40}?(?:verhandlungssicher|flie(?:ß|ss)end|stilsicher|einwandfrei|exzellent|Muttersprache)'
+      - '\bSchweizerdeutsch'
+    # "deutschsprachig" no está a propósito: suele ser la región ("deutschsprachige Schweiz").
+    nice_guard: '(?i)von\s+Vorteil|wünschenswert|erwünscht|ein\s+Plus|vorteilhaft|nice\s+to\s+have|is\s+a\s+plus|musst\s+du\s+(?:es\s+)?nicht|nicht\s+(?:zwingend|erforderlich|notwendig|nötig|Voraussetzung)'
+    guard_window_chars: 60
+  condensed_max_chars: 2000
+  snippet_context_chars: 150
+
+# Evidencia que se extrae del texto crudo para el LLM. Regex sin distinguir mayúsculas.
+evidence:
+  lang:
+    # "native" solo en contexto de idioma (no "Cloud Native", "AI-native", "React Native"...).
+    # Van primero: en la alternancia gana el patrón más específico.
+    - '\bnative[- ](?:speakers?|speaking|level|language|proficiency|fluency|english|german|dutch|french|italian|luxembourgish)\b'
+    - '\b(?:english|german|dutch|french|italian|luxembourgish)\W{1,4}native\b'
+    - '\bnear[- ]native\b'
+    - '\bnative or (?:near[- ]native|fluent|bilingual)\b'
+    - '\bfluent(?:ly)?\b'
+    - '\bflie(?:ß|ss)end\b'
+    - '\bverhandlungssicher\b'
+    - '\bcourant\b'
+    - '\bvloeiend\b'
+    - '\b(?:german|deutsch(?:kenntnisse)?|deutsche)\b'
+    - '\b(?:dutch|nederlands|niederländisch)\b'
+    - '\b(?:french|français|francais|französisch)\b'
+    - '\b(?:italian|italiano|italienisch)\b'
+    - '\b(?:spanish|español|espanol|spanisch|espagnol)\b'
+    - '\b(?:luxembourgish|luxemburgisch|luxembourgeois|lëtzebuergesch)\b'
+    - '\b[ABC][12]\b'
+    - '\bmother tongue\b'
+    - '\bmuttersprache\b'
+    - '\bbilingual\b'
+  residency:
+    - '\breside\b'
+    - '\bresiden(?:t|ce|cy)\b'
+    - '\bcurrently (?:based|living|located)\b'
+    - '\blocal candidates\b'
+    - '\bwork permit\b'
+    - '\bright to work\b'
+    - '\barbeitsbewilligung\b'
+    - '\barbeitserlaubnis\b'
+    - '\bwohnsitz\b'
+    - '\bwohnhaft\b'
+    - '\b(?:EU|EFTA|Swiss) (?:citizen|national)'
+    - '\bno (?:visa )?sponsorship\b'
+    - '\brelocat'
+    - '\b(?:security )?clearance\b'
+    - '\b(?:NATO|VGB-[AB])\b'
+
+# Detección de secciones para armar desc_condensed (sobre títulos de sección).
+condense:
+  priority:   # requisitos: van primero
+    - requirement
+    - qualification
+    - your profile
+    - profile
+    - what you bring
+    - you bring
+    - you have
+    - who you are
+    - must[- ]have
+    - skills
+    - experience
+    - ihr profil
+    - dein profil
+    - anforderungen
+    - was du mitbringst
+    - was sie mitbringen
+    - votre profil
+    - profiel
+    - wat breng je mee
+    - functie-eisen
+  secondary:  # tareas: van después
+    - responsibilit
+    - what you.?ll do
+    - your role
+    - the role
+    - tasks
+    - your mission
+    - ihre aufgaben
+    - deine aufgaben
+    - aufgaben
+    - vos missions
+    - wat ga je doen
+  drop:       # boilerplate: se descarta
+    - benefit
+    - what we offer
+    - we offer
+    - why join
+    - why us
+    - perks
+    - about us
+    - about the company
+    - who we are
+    - our company
+    - wir bieten
+    - unser angebot
+    - über uns
+    - equal opportunit
+    - diversity
+    - inclusion
+    - how to apply
+    - application process
+    - contact
+    - kontakt
+    - nous offrons
+    - wat wij bieden
+    - over ons
+  # Oraciones que se borran en cualquier parte del texto.
+  drop_sentences:
+    - 'equal opportunity employer'
+    - 'without regard to (?:race|age|gender)'
+    - 'we (?:do not|don.t) accept (?:unsolicited )?(?:cvs|applications) from (?:agencies|recruiters)'
+    - 'reasonable accommodation'

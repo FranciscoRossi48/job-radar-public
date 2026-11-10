@@ -1,0 +1,6 @@
+[
+  {"_id": "sdj1", "name": "Senior Data Engineer", "company": "Acme AG", "jobUrl": "Acme-Senior-Data-Engineer",
+   "actualCity": "Zürich", "techCategory": "Data", "expLevel": "Senior", "activeFrom": "2026-10-10T00:00:00.000+02:00", "isPaused": false},
+  {"_id": "sdj2", "name": "Junior Data Engineer", "company": "Acme AG", "jobUrl": "Acme-Junior", "techCategory": "Data", "expLevel": "Junior"},
+  {"_id": "sdj3", "name": "Java Developer", "company": "Acme AG", "jobUrl": "Acme-Java", "techCategory": "Java", "expLevel": "Senior"}
+]

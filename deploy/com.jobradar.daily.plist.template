@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  Plantilla. No la copies a mano: deploy/install.sh reemplaza __UV__, __ROOT__ y
+  __NOT_BEFORE__ y la instala en ~/Library/LaunchAgents/com.jobradar.daily.plist.
+  No usa StartCalendarInterval: si la Mac dormía a esa hora, launchd no siempre la corría al
+  despertar (pasó el 28/10/2026). En cambio se lanza al iniciar sesión y cada 30 minutos, y
+  run-daily (con once-per-day) solo corre de verdad una vez por día, desde la hora indicada.
+-->
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>com.jobradar.daily</string>
+
+  <key>ProgramArguments</key>
+  <array>
+    <string>__UV__</string>
+    <string>--directory</string>
+    <string>__ROOT__</string>
+    <string>run</string>
+    <string>job-radar</string>
+    <string>run-daily</string>
+    <string>--no-log-console</string>
+    <string>--once-per-day</string>
+    <string>--not-before</string>
+    <string>__NOT_BEFORE__</string>
+  </array>
+
+  <key>WorkingDirectory</key>
+  <string>__ROOT__</string>
+
+  <key>EnvironmentVariables</key>
+  <dict>
+    <key>PATH</key>
+    <string>/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin</string>
+  </dict>
+
+  <key>StartInterval</key>
+  <integer>1800</integer>
+
+  <!-- Los logs de la app van a logs/job-radar.log (JSON, rotado). Acá solo queda lo que
+       escape del logging (ej. un error al arrancar). -->
+  <key>StandardOutPath</key>
+  <string>__ROOT__/logs/launchd.out.log</string>
+  <key>StandardErrorPath</key>
+  <string>__ROOT__/logs/launchd.err.log</string>
+
+  <key>RunAtLoad</key>
+  <true/>
+  <key>ProcessType</key>
+  <string>Background</string>
+  <key>LowPriorityIO</key>
+  <true/>
+</dict>
+</plist>

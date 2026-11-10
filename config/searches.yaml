@@ -1,0 +1,123 @@
+jobspy:
+  # google quedó afuera: en todas las pruebas (oct 2026) devolvió 0 resultados.
+  sites: [linkedin, indeed]
+  # 72 h: si un día la Mac estuvo apagada, la corrida siguiente recupera esos avisos. Los ya
+  # vistos no se reevalúan (dedup por id), así que no cuesta más Gemini.
+  hours_old: 72
+  # Las búsquedas fijas (`queries`, corren todos los días) miran solo desde la última corrida
+  # limpia de esa fuente, más un margen, entre since_last_run_min_h y hours_old. Con 72 h los 60
+  # resultados se gastaban en avisos ya vistos (el 06/11, 1 nuevo de 60) y los nuevos quedaban
+  # afuera. Las rotativas corren cada 3 días y siguen con hours_old.
+  since_last_run: true
+  since_last_run_min_h: 24
+  since_last_run_margin_h: 6
+  # Por (sitio, query, país). Con 25, LinkedIn topaba siempre (75 por corrida) y en 72 h hay
+  # entre 70 y más de 100 avisos por búsqueda en Suiza.
+  results_wanted: 60
+  # Descripciones de LinkedIn: se piden después del listado y solo para avisos nuevos con título
+  # relevante (pedirlas para todos gastaba ~85% de los requests en avisos ya conocidos y LinkedIn
+  # respondía 429). Tras linkedin_detail_max_failures fallas seguidas se deja de pedir; los que
+  # quedan sin descripción se reintentan la próxima vez que aparezcan.
+  linkedin_fetch_description: true
+  linkedin_detail_delay_s: [2, 5]
+  linkedin_detail_max_failures: 5
+  # Desde cuántos avisos sin descripción el push dice "CSV con problemas". Uno o dos sueltos son
+  # normales y se reintentan solos; un listado cortado por 429 avisa siempre.
+  linkedin_missing_warn_min: 5
+  delay_between_calls_s: [4, 9]   # pausa aleatoria entre llamadas, en segundos
+  # Si una búsqueda sale cortada por 429, LinkedIn acaba de bloquear: pausa más larga antes de la
+  # siguiente búsqueda y antes de pedir las descripciones (con 4-9 s chocaban en cadena).
+  cooldown_after_cut_s: [60, 120]
+  # El bloqueo de LinkedIn dura más que esa pausa, pero horas después se levanta: el rescate
+  # (--skip-ingest, al mediodía) retoma desde donde quedaron las búsquedas de hoy cortadas por
+  # 429 (o que no llegaron a correr) y pide las descripciones que faltaron. Una vez por día.
+  retry_in_rescue: true
+  backoff:
+    max_retries: 3
+    base_s: 30
+    max_s: 300
+  # Plantilla para Google Jobs (necesita una frase en lenguaje natural).
+  google_template: "{query} jobs near {location} since yesterday"
+
+# `queries` corren todos los días; de `rotating_queries` corren `rotating_per_day`, por turnos.
+# LinkedIn da 429 tras ~120 avisos de listado, así que el total diario queda en 3 búsquedas.
+# 6 rotativas de a 2 = ciclo de 3 días, igual a hours_old (72 h): ninguna deja un hueco.
+queries:
+  - data engineer
+rotating_queries:
+  - analytics engineer
+  - data analyst
+  - BI engineer
+  - data scientist
+  - machine learning engineer
+  - business analyst
+rotating_per_day: 2
+
+countries:
+  - code: CH
+    linkedin_location: Switzerland
+    indeed_country: switzerland
+    indeed_location: ""
+    google_location: Zurich, Switzerland
+  - code: NL
+    linkedin_location: Netherlands
+    indeed_country: netherlands
+    indeed_location: ""
+    google_location: Amsterdam, Netherlands
+  - code: LU
+    linkedin_location: Luxembourg
+    indeed_country: luxembourg
+    indeed_location: ""
+    google_location: Luxembourg
+
+# Países activos (ISO-2). Desde el 27/10/2026 solo Suiza; NL y LU quedan configurados pero en
+# pausa (ni JobSpy ni las empresas de esos países se consultan). Vacío = todos los de `geo`.
+active_countries: [CH]
+
+# Alias para resolver el país de un aviso a partir del texto de ubicación (ATS globales).
+# Solo se guardan avisos de estos países.
+geo:
+  CH: [switzerland, schweiz, suisse, svizzera, zurich, zürich, zuerich, basel, bern, berne,
+       geneva, geneve, genf, lausanne, lugano, zug, luzern, lucerne, winterthur, st. gallen,
+       st gallen, schaffhausen, aarau, neuchatel, fribourg, freiburg im uechtland, baar,
+       rotkreuz, kaiseraugst, schlieren, wallisellen, opfikon, glattbrugg, dübendorf,
+       visp, stein, monthey, allschwil, muttenz, pratteln, bubendorf, cham, risch, steinhausen,
+       neuhausen am rheinfall, kreuzlingen, vevey, morges, nyon, mendrisio, ecublens, meyrin,
+       plan-les-ouates, satigny, solothurn, zuchwil, olten, thun, biel, bienne, wädenswil,
+       horgen, thalwil, uster, kloten, regensdorf, adliswil, zollikon, kriens, sion, bulle]
+  NL: [netherlands, nederland, the netherlands, holland, amsterdam, rotterdam, utrecht,
+       the hague, den haag, "'s-gravenhage", eindhoven, leiden, delft, groningen, haarlem,
+       amstelveen, hoofddorp, schiphol, maastricht, nijmegen, arnhem, breda, tilburg,
+       amersfoort, zwolle, almere, enschede, diemen, veldhoven, best, oss, venlo, zaandam,
+       rijswijk, zoetermeer, veenendaal, "'s-hertogenbosch", den bosch, alkmaar, apeldoorn,
+       deventer, hilversum, nieuwegein, capelle aan den ijssel, schiedam, vlissingen]
+  LU: [luxembourg, luxemburg, lëtzebuerg, esch-sur-alzette, kirchberg, belval, leudelange,
+       strassen, bertrange, munsbach, contern, betzdorf]
+
+http:
+  timeout_s: 30
+  delay_s: [1.0, 2.5]         # pausa entre requests a un mismo host
+  max_retries: 3
+  backoff_base_s: 10
+  backoff_max_s: 120
+
+swissdevjobs:
+  enabled: true
+  # techCategory del listado (ver https://swissdevjobs.ch). Vacío = todas.
+  tech_categories: [Data, Business, Machine-Learning, Python, Cloud]
+  skip_exp_levels: [Junior]
+  max_details: 60             # tope de detalles nuevos por corrida
+
+iamexpat:
+  enabled: false              # el listado es solo de NL: en pausa mientras active_countries sea [CH]
+  # Páginas de listado (robots.txt permite /career/, crawl-delay 1s). Cada página pesa ~2.7 MB.
+  listing_urls:
+    - https://www.iamexpat.nl/career/jobs-netherlands/it-technology
+  max_pages: 2
+  max_details: 30
+
+ats:
+  # Workday y SmartRecruiters no filtran por país en el listado: tope de detalles por empresa.
+  max_details_per_company: 40
+  # Workday busca por texto; se usan estas búsquedas (no las queries de JobSpy).
+  workday_search_terms: [data, analytics, business intelligence]

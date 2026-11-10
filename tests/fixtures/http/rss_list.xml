@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8" ?><rss version="2.0" xmlns:dc="http://purl.org/dc/elements/1.1/">
+  <channel>
+    <title>Acme Jobs</title>
+    <item>
+      <title>Data Engineer (Snowflake / Finance Data Platform) (#26332) - CONTRACT</title>
+      <link>https://jobs.example.ch/de/jobs/26332</link>
+      <description>For our client we look for a Data Engineer. Summary only.</description>
+      <pubDate>Thu, 05 Nov 2026 19:22:21 +0100</pubDate>
+      <guid isPermaLink="false">1967</guid>
+    </item>
+    <item>
+      <title>Senior Java Fullstack Developer (#26303) - CONTRACT</title>
+      <link>https://jobs.example.ch/de/jobs/26303</link>
+      <description>Java and Angular.</description>
+      <pubDate>Thu, 15 Oct 2026 10:00:00 +0200</pubDate>
+      <guid isPermaLink="false">1938</guid>
+    </item>
+    <item>
+      <title>BI Developer (#26100) - CONTRACT</title>
+      <link>https://jobs.example.ch/de/jobs/26100</link>
+      <description>Power BI reporting, summary only.</description>
+      <pubDate>Mon, 05 Oct 2026 10:00:00 +0200</pubDate>
+      <guid isPermaLink="false">1700</guid>
+    </item>
+  </channel>
+</rss>

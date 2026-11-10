@@ -1,0 +1,40 @@
+# v2: español como idioma propio (`es`), antes caía en `other` y excluía avisos que lo piden.
+prompt_version: v2
+rubric_path: prompts/rubric_v2.md
+
+gemini:
+  # Cadena de modelos, en orden de preferencia. Si un modelo agota su cuota diaria, está
+  # saturado (5xx) o falla, el evaluador pasa al siguiente.
+  # Plan pago (prepago) activo desde el 16/10/2026: sin el tope gratis de 20 requests/día de
+  # los Flash y con prioridad ante la saturación. Si el saldo llega a $0, Google responde 402
+  # y la evaluación corta (los avisos quedan pendientes). Consumo: `job-radar usage`.
+  # rpd es un tope local por modelo (también limita el gasto diario). El contador se reinicia
+  # a medianoche hora del Pacífico. Límites de tu proyecto: https://aistudio.google.com/rate-limit
+  # gemini-3.5-flash es alias de 3.6; gemini-2.5-flash(-lite) no existe para cuentas nuevas.
+  models:
+    - name: gemini-3.8-flash
+      rpm: 30
+      rpd: 300
+      thinking_level: low
+    - name: gemini-3.5-flash-lite
+      rpm: 30
+      rpd: 300
+      thinking_level: low
+    - name: gemini-3.1-flash-lite
+      rpm: 30
+      rpd: 300
+      thinking_level: low
+  max_jobs_per_run: 150
+  # Timeout por request (s). Sin él, si la Mac se duerme con un pedido en vuelo, la corrida queda
+  # colgada para siempre; con él, ese aviso falla, se reintenta otro día y la corrida sigue.
+  request_timeout_s: 120
+  temperature: 0
+  max_retries: 4
+  # Si un modelo responde 5xx (saturado) estas veces seguidas, se saltea por el resto de la
+  # corrida y se usa el siguiente de la cadena.
+  unavailable_after: 2
+  # Si es el último modelo que queda, más paciencia: hasta N intentos con espera creciente
+  # (15s, 30s, 60s, 120s...) antes de cortar la evaluación.
+  last_model_retries: 6
+  backoff_base_s: 15
+  backoff_max_s: 120

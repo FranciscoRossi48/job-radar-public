@@ -1,0 +1,11 @@
+{"jobs": [
+  {"id": 101, "title": "Senior Data Engineer", "absolute_url": "https://boards.greenhouse.io/acme/jobs/101",
+   "location": {"name": "Zurich, Switzerland"}, "offices": [{"name": "Zurich", "location": "Zurich, Switzerland"}],
+   "first_published": "2026-10-10T09:00:00-04:00", "updated_at": "2026-10-12T09:00:00-04:00",
+   "content": "&lt;h3&gt;Your profile&lt;/h3&gt;&lt;ul&gt;&lt;li&gt;5+ years of SQL and Python&lt;/li&gt;&lt;li&gt;Fluent English&lt;/li&gt;&lt;/ul&gt;"},
+  {"id": 102, "title": "Data Engineer", "absolute_url": "https://boards.greenhouse.io/acme/jobs/102",
+   "location": {"name": "Warsaw"}, "offices": [{"name": "Warsaw", "location": "Warsaw, Masovian Voivodeship, Poland"}],
+   "content": "&lt;p&gt;Warsaw role&lt;/p&gt;"},
+  {"id": 103, "title": "BI Engineer", "absolute_url": "https://boards.greenhouse.io/acme/jobs/103",
+   "location": {"name": ""}, "offices": [], "content": "&lt;p&gt;No location given&lt;/p&gt;"}
+]}

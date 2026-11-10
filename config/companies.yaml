@@ -1,0 +1,66 @@
+# Empresas consultadas directamente en su ATS (API pública, sin credenciales).
+#
+# Campos: name, ats, token, country (ISO-2: país "por defecto" si el aviso no trae ubicación),
+#         extra (opcional, depende del ATS).
+# ats: greenhouse | lever | ashby | smartrecruiters | workday | recruitee | personio |
+#      successfactors | brassring | matador | rss
+#
+# Cómo encontrar el token (mirá la URL de la página de empleos de la empresa):
+#   greenhouse       boards.greenhouse.io/{token}  o  job-boards.greenhouse.io/{token}
+#   lever            jobs.lever.co/{token}
+#   ashby            jobs.ashbyhq.com/{token}
+#   smartrecruiters  jobs.smartrecruiters.com/{token}
+#   recruitee        {token}.recruitee.com
+#   personio         {token}.jobs.personio.de  (o .com)
+#   workday          {tenant}.{host}.myworkdayjobs.com/{site}  ->  token = tenant,
+#                    extra: {host: wd3, site: roche-ext}
+#   successfactors   careers.{token}.com/search/  (o extra: {host: jobdetails.nestle.com})
+#   brassring        jobs.{token}.com/TGnewUI/... -> extra: {host, partnerid, siteid}
+#   matador          WordPress con Matador Jobs ({host}/wp-json/wp/v2/matador-job-listings)
+#                    -> extra: {host: www.rmgroup.ch}
+#   rss              feed RSS de avisos + JSON-LD del detalle -> extra: {url, title_strip (regex)}
+#
+# Verificadas el 23/10/2026 (el portal responde y tiene avisos en CH/NL/LU). Para sumar una
+# empresa, probá primero: uv run job-radar ingest -s <ats>:<token>
+# No funcionan con estos ATS (usan otros sistemas): Swisscom, ING, ABN AMRO, Philips, ASML,
+# Booking.com, Just Eat Takeaway, Picnic.
+companies:
+  # --- Suiza: pharma, consumo y life sciences ---
+  - {name: Roche, ats: workday, token: roche, country: CH, extra: {host: wd3, site: roche-ext}}
+  - {name: Novartis, ats: workday, token: novartis, country: CH, extra: {host: wd3, site: Novartis_Careers}}
+  - {name: Sandoz, ats: workday, token: sandoz, country: CH, extra: {host: wd103, site: Sandoz_Careers}}
+  - {name: Lonza, ats: workday, token: lonza, country: CH, extra: {host: wd3, site: Lonza_Careers}}
+  - {name: Galderma, ats: workday, token: galderma, country: CH, extra: {host: wd3, site: External}}
+  - {name: Nestlé, ats: successfactors, token: nestle, country: CH, extra: {host: jobdetails.nestle.com}}
+  # --- Suiza: banca, seguros y fintech ---
+  - {name: UBS, ats: brassring, token: ubs, country: CH, extra: {host: jobs.ubs.com, partnerid: "25008", siteid: "5012"}}
+  - {name: Swiss Re, ats: successfactors, token: swissre, country: CH, extra: {host: careers.swissre.com}}
+  - {name: Zurich Insurance, ats: successfactors, token: zurich, country: CH, extra: {host: www.careers.zurich.com}}
+  - {name: Julius Baer, ats: workday, token: juliusbaer, country: CH, extra: {host: wd3, site: External}}
+  - {name: Swissquote, ats: smartrecruiters, token: Swissquote, country: CH}
+  - {name: SwissBorg, ats: lever, token: swissborg, country: CH}
+  # --- Suiza: tech ---
+  - {name: Logitech, ats: workday, token: logitech, country: CH, extra: {host: wd5, site: Logitech}}
+  - {name: "On", ats: greenhouse, token: onrunning, country: CH}   # sin comillas YAML lo lee como true
+  - {name: Proton, ats: greenhouse, token: proton, country: CH}
+  - {name: GetYourGuide, ats: greenhouse, token: getyourguide, country: CH}
+  - {name: Scandit, ats: greenhouse, token: scandit, country: CH}
+  - {name: Databricks, ats: greenhouse, token: databricks, country: CH}
+  - {name: Elastic, ats: greenhouse, token: elastic, country: CH}
+  # --- Suiza: consultoras de contratación IT (publican avisos que no están en LinkedIn) ---
+  - {name: Callista, ats: recruitee, token: callista, country: CH}
+  - {name: RM Group, ats: matador, token: rmgroup, country: CH, extra: {host: www.rmgroup.ch}}
+  - name: PROSTAFF
+    ats: rss
+    token: prostaff
+    country: CH
+    extra:
+      url: https://www.prostaff.ch/de/rss
+      title_strip: '\s*\(#\d+\)\s*(?:-\s*[A-Z]+)?\s*$'   # "(#26332) - CONTRACT"
+  # --- Países Bajos ---
+  - {name: Adyen, ats: greenhouse, token: adyen, country: NL}
+  - {name: Rabobank, ats: workday, token: rabobank, country: NL, extra: {host: wd3, site: jobs}}
+  - {name: Catawiki, ats: greenhouse, token: catawiki, country: NL}
+  - {name: Mollie, ats: ashby, token: mollie, country: NL}
+  - {name: bunq, ats: recruitee, token: bunq, country: NL}
+  - {name: Miro, ats: greenhouse, token: realtimeboardglobal, country: NL}

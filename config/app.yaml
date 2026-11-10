@@ -1,0 +1,82 @@
+# Rutas relativas a la raíz del repo.
+db_path: jobs.db
+logs_dir: logs
+exports_dir: exports
+# Carpetas donde se copia cada CSV exportado (ej. Google Drive para escritorio, que lo sube
+# solo a la nube). Acepta ~ y comodines; si una carpeta no existe se avisa en el log y se sigue.
+# Vacío = solo exports/. Ejemplo con Google Drive para escritorio (el nombre de la unidad depende
+# del idioma: "Mi unidad" o "My Drive", de ahí el comodín):
+#   - ~/Library/CloudStorage/GoogleDrive-*/*/Job Radar
+exports_mirror_dirs: []
+# Un job reclamado (claimed) hace más de N minutos vuelve a estar disponible.
+lease_minutes: 30
+# Avisos sin last_seen en los últimos N días pasan a 'stale'.
+stale_days: 14
+
+# Notificación nativa de macOS (osascript) si falla un paso o se agota el saldo de Gemini.
+notify_on_error: true
+
+# Push al celular con ntfy (app ntfy, suscripta al tema). El tema va en .env (NTFY_TOPIC): en el
+# servidor público cualquiera que lo adivine lee los mensajes, así que es largo y al azar.
+ntfy:
+  enabled: false              # activalo después de poner NTFY_TOPIC en .env
+  server: https://ntfy.sh
+  notify_success: true        # también avisar cuando el CSV sale bien (no solo ante fallas)
+  top_n: 3                    # ofertas con mejor score que se listan en el mensaje
+  timeout_s: 10
+  # Reintentos del envío: el rescate de las 13:00 suele correr en un despertar oscuro, con la
+  # red intermitente, que es justo cuando hay que avisar que no hubo búsqueda.
+  retries: 3
+  retry_wait_s: 20
+
+# Respaldo diario de jobs.db (comprimido) en <carpeta espejo>/backups. La base no está en Git:
+# sin esto, solo existe en esta Mac.
+backup:
+  enabled: false              # necesita una carpeta en exports_mirror_dirs
+  subdir: backups
+  keep: 7                     # días de respaldo que se conservan
+
+# Red al despertar (run-daily --once-per-day). launchd puede lanzar la corrida en un "despertar
+# oscuro" de la Mac (tapa cerrada, unos segundos de mantenimiento) con la red intermitente: el
+# 29/10/2026 fallaron SwissDevJobs, los Workday y parte de LinkedIn/Indeed por DNS.
+network:
+  # Antes de arrancar se espera hasta wait_s a que estos hosts resuelvan; si no, se saltea y
+  # launchd reintenta a la media hora.
+  check_hosts: [www.linkedin.com, apis.indeed.com, swissdevjobs.ch]
+  wait_s: 120
+  poll_s: 10
+  # Errores (nivel ERROR del log) que cuentan como "falta de red" durante el ingest. JobSpy no
+  # lanza excepción: solo loguea, por eso se miran los logs y no solo las fuentes caídas.
+  error_patterns: 'nodename nor servname|Name or service not known|Temporary failure in name resolution|Network is unreachable|Max retries exceeded|ConnectError|ConnectTimeout'
+  # Una corrida con errores de red no cuenta como la del día y se repite, hasta este tope.
+  max_daily_attempts: 3
+
+dedup:
+  # Nivel 3: distancia de Hamming máxima entre simhash de 64 bits para considerar duplicado.
+  simhash_max_distance: 3
+  # Si dos avisos tienen el mismo título normalizado y el mismo país (ej. agregadores como
+  # Silicon Luxembourg que republicarán con otro nombre de empresa y un encabezado propio),
+  # se permite una distancia de simhash mayor.
+  simhash_same_title_max_distance: 10
+  # Descripciones más cortas no se comparan por simhash (demasiado ruido).
+  simhash_min_chars: 400
+  # Solo se compara contra avisos vistos en los últimos N días.
+  window_days: 45
+
+mcp:
+  # Quién figura en claimed_by y en evaluations.evaluator para la vía Claude.
+  evaluator: claude
+  # Modo "shortlist" de get_batch: jobs con score de Gemini en este rango (los más dudosos),
+  # evaluados en los últimos N días y todavía sin evaluación de Claude.
+  shortlist_score_range: [50, 80]
+  shortlist_days: 1
+  batch_max: 25
+
+logging:
+  level: INFO
+  file: job-radar.log          # dentro de logs_dir; formato JSON (una línea por evento)
+  max_bytes: 5000000           # rota al llegar a ~5 MB
+  backup_count: 5              # guarda job-radar.log.1 ... .5
+  runs_file: runs.jsonl        # resumen de cada run-daily (una línea por corrida)
+  # Librerías ruidosas: solo WARNING o más.
+  quiet: [httpx, httpcore, google_genai, urllib3, JobSpy]

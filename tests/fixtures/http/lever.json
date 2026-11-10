@@ -1,0 +1,8 @@
+[
+  {"id": "a1b2", "text": "Analytics Engineer", "hostedUrl": "https://jobs.lever.co/acme/a1b2", "country": "CH",
+   "categories": {"location": "Zurich, Switzerland", "allLocations": ["Zurich, Switzerland"]},
+   "descriptionPlain": "Join our analytics team.", "lists": [{"text": "Requirements", "content": "<li>dbt and Snowflake</li>"}],
+   "additionalPlain": "Hybrid.", "createdAt": 1791900000000},
+  {"id": "c3d4", "text": "Data Engineer", "hostedUrl": "https://jobs.lever.co/acme/c3d4", "country": "SG",
+   "categories": {"location": "Singapore, Singapore"}, "descriptionPlain": "Singapore role.", "lists": []}
+]

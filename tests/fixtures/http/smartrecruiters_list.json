@@ -1,0 +1,6 @@
+{"totalFound": 3, "content": [
+  {"id": "744001", "name": "Senior Data Engineer", "releasedDate": "2026-10-13T10:15:09.039Z",
+   "location": {"city": "Zurich", "country": "ch", "fullLocation": "Zurich, Switzerland"}},
+  {"id": "744002", "name": "Data Engineer", "location": {"city": "Stuttgart", "country": "de"}},
+  {"id": "744003", "name": "Marketing Manager", "location": {"city": "Zurich", "country": "ch"}}
+]}

@@ -1,0 +1,77 @@
+# Score 0-100 calculado en Python a partir de las features del LLM. Cambiá pesos y corré
+# `job-radar rescore` (no hace falta reevaluar).
+base: 60
+
+hard_exclusions:
+  # Idioma no inglés con level=required y CEFR mayor a tu nivel en profile.yaml.
+  lang_above_profile: true
+  # residency_hard_req=true y el país no está en profile.residency_countries.
+  residency: true
+  seniority_junior: true
+  # Habilitación de seguridad (OTAN/defensa/gobierno): requiere ciudadanía o años de residencia.
+  security_clearance: true
+  security_clearance_pattern: '(?i)\b(?:security\s+clearance|(?:nato|eu|national)\s+(?:secret|cosmic|confidential)\b|vgb-[ab]\b|habilitation\s+(?:de\s+s[eé]curit[eé]|secret)|sicherheits(?:über)?prüfung\s+psp)'
+  # Un match negado ("no security clearance required", "clearance is not needed") no excluye.
+  # Se busca la negación en la misma oración, hasta N caracteres antes o después del match.
+  security_clearance_negation: '(?i)\b(?:no|not|without|never|kein\w*|nicht|ohne)\b'
+  security_clearance_negation_window: 40
+
+# Si un idioma es `required` pero el LLM no pudo determinar el CEFR, se asume este nivel.
+# Con alemán B1 en el perfil: "German required" sin nivel -> B1 -> pasa con penalización.
+# Francés/neerlandés sin nivel -> B2 -> excluido (no los hablás).
+missing_cefr:
+  de: B1
+  default: B2
+
+penalties:
+  # Idioma "nice to have", por idioma. No aplica si el aviso pide un CEFR que ya tenés.
+  # Alemán "a plus" no penaliza: con B1 lo cubrís razonablemente.
+  lang_nice: {de: 0, default: 8}
+  lang_required_within_level: 6   # requerido pero dentro de tu nivel (ej. alemán B1)
+  # Idioma en que está redactada la descripción.
+  desc_lang: {de: 10, fr: 25, nl: 25, it: 20}
+  onsite_only: 5
+  red_flag: 4
+  red_flag_max: 12
+  # Red flags que repiten algo que ya puntúa otro campo (idioma, residencia, on-site,
+  # seniority, security clearance) se ignoran para no penalizar dos veces.
+  red_flag_ignore: '(?i)\b(?:german|french|dutch|italian|luxembourgish|spanish|español|language|deutsch|fran[cç]ais|residen|reside|living in|local candidates|on-?site|office|junior|seniority|security\s+clearance)'
+  # Priors por ubicación (regex sobre location, sin distinguir mayúsculas). Se aplica la mayor.
+  # Moderados para no dejar afuera avisos 100% en inglés de multinacionales en Ginebra/Lausana;
+  # si el aviso además menciona francés/italiano como "nice", se suma la penalización de lang_nice.
+  location_priors:
+    - name: Romandie (francés)
+      pattern: '\b(?:gen[eè]v[ea]|genf|lausanne|vaud|waadt|neuch[aâ]tel|fribourg|freiburg|valais|wallis|sion|nyon|montreux|vevey|yverdon|morges|delémont|jura)\b'
+      penalty: 8
+    - name: Ticino (italiano)
+      pattern: '\b(?:ticino|tessin|lugano|bellinzona|locarno|mendrisio|chiasso)\b'
+      penalty: 6
+    - name: Luxemburgo (francés frecuente)
+      pattern: '\b(?:luxembourg|luxemburg)\b'
+      penalty: 6
+
+bonus:
+  stack_match_per_item: 4         # por tecnología de tu perfil encontrada
+  stack_match_max: 20
+  seniority: {junior: 0, mid: 0, senior: 10, lead: 12, unknown: 0}
+  role_family: {DE: 8, AE: 8, BI: 8, DA: 6, DS: 6, other: -15}
+  # Idiomas que juegan a favor (los hablás de sobra): suman si el aviso los pide, por nivel, y no
+  # llevan la penalización de lang_required_within_level. Ej. FIA (10/11): "Fluent English and Spanish".
+  lang: {es: {required: 8, nice: 4}}
+  # Preferencia por país (ISO-2). Suiza es la primera opción; NL y LU, las alternativas.
+  country: {CH: 5}
+  # Roles vecinos a Data/BI (títulos que pasan el prefiltro sin nombrar datos): reemplazan el
+  # bonus de role_family por `points` solo si el aviso pide al menos `min_stack` tecnologías de
+  # tu perfil. Con menos cuentan como `fallback_role` (other), así un AI/ML Engineer de visión
+  # por computadora o un Python developer de backend no llegan al CSV por seniority.
+  adjacent_role:
+    pattern: '(?i)^(?!.*\b(?:data|daten|analytics|dwh|bi|etl)\b).*(?:\b(?:ai|ki|ml|genai)\b.{0,30}\b(?:engineer|engineering|developer|scientist|architect)\b|machine learning|\bml ?ops\b|\b(?:business|product|systems?|technical|it|process|pricing|quantitative)\s+analyst\b|\b(?:solutions?|cloud)\s+architect\b|\b(?:cloud|platform)\s+engineer\b|\bdatabase\b|\bsql\b)'
+    min_stack: 2
+    points: -5
+    fallback_role: other
+
+# Umbral para export y shortlist.
+threshold: 70
+# Qué evaluación define el score vigente de un job si hay varias (la más reciente gana
+# dentro del mismo evaluador).
+evaluator_priority: [claude, gemini]
