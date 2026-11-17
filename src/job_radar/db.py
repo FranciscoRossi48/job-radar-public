@@ -448,8 +448,9 @@ def reprefilter(conn: sqlite3.Connection, pre_run, reopen_days: int = 14) -> dic
     """Vuelve a correr el prefiltro sobre description_raw de todos los jobs.
 
     Refresca desc_condensed, desc_lang y snippets en todos. El status cambia en jobs 'pending'
-    (pasan a excluded_prefilter si ahora corresponde) y en los descartados por título vistos
-    en los últimos `reopen_days` días, si el título ya es relevante: lo evaluado no se toca.
+    (pasan a excluded_prefilter si ahora corresponde) y en los descartados por título o idioma
+    vistos en los últimos `reopen_days` días, si con la config actual ya pasan: lo evaluado no
+    se toca.
     """
     out = {"refreshed": 0, "newly_excluded": 0, "reopened": 0}
     cutoff = (datetime.now(UTC) - timedelta(days=reopen_days)).isoformat(timespec="seconds")
@@ -480,12 +481,11 @@ def reprefilter(conn: sqlite3.Connection, pre_run, reopen_days: int = 14) -> dic
                 (res.reason, r["id"]),
             )
             out["newly_excluded"] += 1
-        elif (
-            r["exclude_reason"] == "title_not_relevant"
-            and r["last_seen"] >= cutoff
-            and res.reason != "title_not_relevant"
-        ):
-            # Sin descripción queda en no_description: se pide cuando el aviso reaparezca.
+        elif (r["exclude_reason"] or "").startswith(("title_", "desc_lang:")) and r[
+            "last_seen"
+        ] >= cutoff:
+            # Una regla del prefiltro (título o idioma) pudo haber cambiado. Sin descripción
+            # queda en no_description: se pide cuando el aviso reaparezca.
             conn.execute(
                 "UPDATE jobs SET status = ?, exclude_reason = ? WHERE id = ?",
                 ("excluded_prefilter" if res.excluded else "pending", res.reason, r["id"]),

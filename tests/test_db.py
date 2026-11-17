@@ -95,6 +95,14 @@ def test_reprefilter_reopens_title_that_became_relevant(tmp_path):
     ]
 
 
+def test_reprefilter_reopens_ad_whose_language_is_no_longer_excluded(tmp_path):
+    conn = db.connect(tmp_path / "t.db")
+    db.upsert_job(conn, _job(), PrefilterResult(excluded=True, reason="desc_lang:fr"))
+    out = db.reprefilter(conn, lambda job: PrefilterResult(excluded=False, desc_lang="fr"))
+    assert out["reopened"] == 1
+    assert conn.execute("SELECT status FROM jobs").fetchone()[0] == "pending"
+
+
 def test_pending_for_evaluation_skips_paused_countries(tmp_path):
     conn = db.connect(tmp_path / "t.db")
     for i in "123":
