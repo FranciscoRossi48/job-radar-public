@@ -1,8 +1,8 @@
 # job-radar
 
 A local pipeline that finds and filters Data Engineering / BI job ads in **Switzerland, the
-Netherlands and Luxembourg**. It runs on your Mac, from your own IP. There is no server; the
-only cost is Gemini API usage.
+Netherlands and Luxembourg**. It runs on your computer, from your own IP. There is no server;
+the only cost is usage of the configured LLM provider.
 
 > **Personal project.** I built it for my own job search and share it as an example. Respect
 > each site's terms of use and `robots.txt`, use public endpoints only (never cookies or
@@ -13,7 +13,7 @@ only cost is Gemini API usage.
 > README are in English.
 
 ```
-sources ──> prefilter ──> dedup ──> SQLite ──> Gemini (features) ──> score in Python ──> CSV
+sources ──> prefilter ──> dedup ──> SQLite ──> LLM (features) ──> score in Python ──> CSV
 (JobSpy, SwissDevJobs,  (title,    (id, company+title,               │
  IamExpat, ATS)          language)  simhash)                          └─> Claude Desktop (MCP):
                                                                           second opinion
@@ -28,7 +28,7 @@ sources ──> prefilter ──> dedup ──> SQLite ──> Gemini (features)
   - Recruiting agencies that publish through Matador Jobs on WordPress, or through an RSS feed.
 - **Cheap prefilter:** before any LLM call, drops ads by title (intern, junior,
   Werkstudent...) and by ad language (French/Dutch, or German ads that ask for C1).
-- **Gemini only extracts facts:** required languages and level, residency requirements,
+- **The LLM only extracts facts:** required languages and level, residency requirements,
   seniority, role and tech stack. The **0–100 score is computed in Python** with the weights in
   `config/scoring.yaml`, so you can re-rank everything without calling the LLM again.
 
@@ -53,8 +53,23 @@ cd ~/code/job-radar && uv sync
 cp .env.example .env
 ```
 
-Open `.env` and paste your Gemini key into `GEMINI_API_KEY=`. You can create one for free at
+Open `.env` and fill in the key for the provider selected in `config/llm.yaml`. The default
+`gemini` provider reads `GEMINI_API_KEY=`; you can create one at
 <https://aistudio.google.com/apikey>. This file is not committed to git.
+
+AgentRouter is available as an alternative: set `provider: agentrouter` in `config/llm.yaml`
+and fill `AGENTROUTER_API_KEY=` (get it from <https://agentrouter.org/console/token>).
+AgentRouter rejects unapproved HTTP clients, so a second backend, `agentrouter_codex`, sends
+requests through the official **Codex CLI** instead:
+
+```bash
+npm install -g @openai/codex   # or see https://github.com/openai/codex
+codex --version
+```
+
+job-radar creates a temporary `CODEX_HOME` with the AgentRouter configuration and your key, so
+your own `~/.codex` is never modified. Direct HTTP remains available with `provider:
+agentrouter` for environments where AgentRouter approves the client.
 
 Review your profile in `config/profile.yaml`: summary, languages, stack and the countries you
 already live in.
@@ -71,7 +86,7 @@ uv run pytest
 |---|---|
 | `uv run job-radar run-daily` | Full run: ingest → evaluate → export. This is what launchd runs. |
 | `uv run job-radar ingest` | Ingestion only. Options: `-s linkedin` / `-s ats` / `-s greenhouse:token`, `-c CH`, `-q "data engineer"`, `--limit 10`. |
-| `uv run job-radar evaluate -n 20` | Evaluates up to 20 pending ads with Gemini. |
+| `uv run job-radar evaluate -n 20` | Evaluates up to 20 pending ads with the configured LLM. |
 | `uv run job-radar export` | **New**: ads with score ≥ threshold that haven't appeared in any report yet. They're appended to `exports/shortlist_<today>.csv` and marked as exported. |
 | `uv run job-radar export --all` | **History**: full ranking of everything that passed, in `exports/ranking_all.csv` (marks nothing). |
 | `uv run job-radar export --day 2026-10-15` | What was evaluated that day, in `exports/evaluated_<day>.csv`. `--min-score 60` changes the threshold. |
@@ -82,7 +97,7 @@ uv run pytest
 | `uv run job-radar stats` | Counts by status, source and evaluator. |
 | `uv run job-radar decide <id> applied\|discarded\|clear --note "..."` | Records a decision by hand (Claude can also do it with `set_decisions`). |
 | `uv run job-radar applications` | The jobs you applied to. |
-| `uv run job-radar usage` | Gemini requests and tokens per day and model (to keep spending in check). |
+| `uv run job-radar usage` | LLM requests and tokens per day, provider and model. |
 | `uv run job-radar mcp-config` | Configuration block for Claude Desktop. |
 
 ## Daily use
@@ -94,8 +109,8 @@ uv run pytest
    open it on your phone. Set them in `exports_mirror_dirs` in `config/app.yaml`.
 3. For borderline ads, ask **Claude Desktop** (Chat tab):
    *"Use job-radar: get a batch in shortlist mode, evaluate it and save the evaluations."*
-   Claude reviews the ads Gemini scored between 50 and 80, and its evaluation becomes the
-   current one.
+   Claude reviews the ads the configured LLM scored between 50 and 80, and its evaluation
+   becomes the current one.
 
 ## Claude Desktop (MCP)
 
@@ -146,7 +161,7 @@ Only ads from the configured countries are stored (the city aliases are in
 | `config/profile.yaml` | Your languages (CEFR), stack (plus `stack_aliases`) and `residency_countries`. A stack item adds points if the LLM detects it **or** if it appears literally in the ad. |
 | `config/prefilter.yaml` | Excluded title words, relevant titles, excluded ad languages, patterns for high-level German requirements. |
 | `config/searches.yaml` | Fixed and rotating queries, the since-last-run window, active countries, sources and pauses between requests. |
-| `config/llm.yaml` | The Gemini model chain and its limits. |
+| `config/llm.yaml` | LLM provider, model chain, request limits and timeouts. |
 
 After changing `scoring.yaml` or `profile.yaml`, run `uv run job-radar rescore`. After
 changing `prefilter.yaml`, run `uv run job-radar reprefilter` and then `dedup`. This reopens
@@ -156,21 +171,28 @@ If you move to one of the target countries, add it to `residency_countries` in `
 and run `rescore`. Ads that require you to "currently live in" that country stop being
 excluded.
 
-## Gemini: plans and costs
+## LLM providers and costs
 
-The **Google AI Pro** subscription (the Gemini app) does **not** include the API: they're
-separate products. job-radar uses the API with the key in `.env`.
+`config/llm.yaml` selects the provider. `gemini` keeps the original Google AI Studio backend.
+`agentrouter` and `agentrouter_codex` use AgentRouter's OpenAI-compatible API
+(`https://agentrouter.org/v1`); the latter sends requests through the approved Codex CLI
+because AgentRouter rejects unapproved HTTP clients. The same file defines the model chain,
+request limits, timeouts and a local daily cap per model (`rpd`) to limit spending.
 
-- **Free plan:** Flash models are capped at a small number of requests per day. Under heavy
-  demand, Google rejects free accounts first (error 503).
-- **Paid plan (prepaid):** no daily cap, and priority under load. Each ad uses about 2,000
-  tokens. Track usage with `uv run job-radar usage` and the real cost at
-  <https://aistudio.google.com/usage>. If the balance hits $0, evaluation stops and the ads stay
-  pending until you top up.
+Gemini: the **Google AI Pro** subscription (the Gemini app) does **not** include the API; they
+are separate products, and API billing and quotas are separate. Under heavy demand, free-tier
+accounts are rejected first. Each ad uses about 2,000 tokens.
 
-`config/llm.yaml` defines the model chain (the best one first, Lite models as fallback) and a
-daily cap per model (`rpd`), which also caps spending. The LLM only receives the condensed
-description and a short summary of your profile, never your CV.
+AgentRouter: model ids change with the provider's catalog, so use the exact id shown in the
+console. Each Codex call carries roughly 11k-14k input tokens of context, which is why
+`codex_max_jobs_per_run` defaults to 25.
+
+Track requests and tokens from any provider with `uv run job-radar usage`, and check actual cost
+in that provider's console. If billing or authentication fails, evaluation stops and the ads
+remain pending.
+
+The LLM only receives the condensed description and a short summary of your profile, never your
+CV.
 
 ## Daily run with launchd
 
@@ -185,8 +207,8 @@ This installs two jobs (in the Mac's local time):
 - **13:00, catch-up:**
   - If LinkedIn cut searches with a 429 in the morning, it resumes them where they stopped
     and fetches the missing descriptions. This happens once per day (`retry_in_rescue`).
-  - Then it evaluates whatever is still pending (for example, if Gemini was overloaded in the
-    morning) and adds what passes the threshold to the day's CSV.
+  - Then it evaluates whatever is still pending (for example, if the LLM provider was
+    overloaded in the morning) and adds what passes the threshold to the day's CSV.
 
 If the Mac is **asleep**, the full run starts shortly after a real wake-up (not during macOS
 dark wakes). If it hasn't run by the catch-up, the catch-up sends a push saying there was no
@@ -241,4 +263,5 @@ JOB_RADAR_LIVE=1 uv run pytest -m live -s
 ```
 
 The last one checks the rubric against 10 synthetic cases with the real Gemini API (about 10
-requests). Project conventions are in `CLAUDE.md`, and the specification is in `SPEC.md`.
+requests); it is an optional Gemini-specific compatibility test. Project conventions are in
+`CLAUDE.md`, and the specification is in `SPEC.md`.

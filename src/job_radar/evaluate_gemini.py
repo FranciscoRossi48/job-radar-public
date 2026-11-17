@@ -11,7 +11,6 @@ import os
 import re
 import sqlite3
 import time
-from collections import deque
 from collections.abc import Callable
 from datetime import datetime
 from zoneinfo import ZoneInfo
@@ -19,9 +18,10 @@ from zoneinfo import ZoneInfo
 from pydantic import ValidationError
 
 from job_radar import db
-from job_radar.config import Config, GeminiModel, GeminiSettings, Profile
+from job_radar.config import Config, GeminiModel, GeminiSettings
+from job_radar.evaluate_common import RateLimiter, build_prompt, sanitize
 from job_radar.ingest.base import backoff_delay
-from job_radar.models import RATIONALE_MAX_WORDS, EvaluationFeatures
+from job_radar.models import EvaluationFeatures
 from job_radar.scoring import JobContext, score
 
 log = logging.getLogger(__name__)
@@ -39,57 +39,6 @@ class BillingExhausted(Exception):
 
 class ModelsUnavailable(Exception):
     """Todos los modelos de la cadena agotaron su cuota o están caídos (5xx) en esta corrida."""
-
-
-class RateLimiter:
-    """Ventana deslizante de 60s para RPM."""
-
-    def __init__(
-        self,
-        rpm: int,
-        clock: Callable[[], float] = time.monotonic,
-        sleep: Callable[[float], None] = time.sleep,
-    ):
-        self.rpm, self.clock, self.sleep = rpm, clock, sleep
-        self.calls: deque[float] = deque()
-
-    def acquire(self) -> None:
-        now = self.clock()
-        while self.calls and now - self.calls[0] >= 60:
-            self.calls.popleft()
-        if len(self.calls) >= self.rpm:
-            self.sleep(60 - (now - self.calls[0]) + 0.5)
-            return self.acquire()
-        self.calls.append(self.clock())
-
-
-def profile_brief(p: Profile) -> str:
-    langs = ", ".join(f"{k} {v}" for k, v in p.languages.items())
-    return (
-        f"{p.summary.strip()}\nLanguages (CEFR): {langs}. No other languages.\n"
-        f"Stack list: {', '.join(p.stack)}"
-    )
-
-
-def build_prompt(job: sqlite3.Row | dict, profile: Profile) -> str:
-    snippets = json.loads(job["lang_snippets"] or "[]")
-    ev = "\n".join(f"- [{s['kind']}] {s['text']}" for s in snippets) or "(none)"
-    return (
-        f"## Candidate profile\n{profile_brief(profile)}\n\n"
-        f"## Job ad\nTitle: {job['title']}\nCompany: {job['company'] or '?'}\n"
-        f"Location: {job['location'] or '?'}\nCountry: {job['country'] or '?'}\n"
-        f"Description language: {job['desc_lang'] or '?'}\n\n"
-        f"### Condensed description\n{job['desc_condensed'] or '(empty)'}\n\n"
-        f"### Evidence snippets (verbatim)\n{ev}\n"
-    )
-
-
-def sanitize(data: dict) -> dict:
-    """Arreglos menores que no cambian el significado (límite de palabras y de red flags)."""
-    words = str(data.get("rationale", "")).split()
-    data["rationale"] = " ".join(words[:RATIONALE_MAX_WORDS])
-    data["red_flags"] = list(data.get("red_flags") or [])[:5]
-    return data
 
 
 def _retry_delay(err) -> float | None:

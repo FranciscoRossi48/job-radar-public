@@ -147,9 +147,9 @@ def run_daily(
 
         def do_evaluate() -> dict:
             if evaluator_factory is None:
-                from job_radar.evaluate_gemini import GeminiEvaluator
+                from job_radar.evaluate import build_evaluator
 
-                ev = GeminiEvaluator(cfg, conn)
+                ev = build_evaluator(cfg, conn)
             else:
                 ev = evaluator_factory(cfg, conn)
             return ev.run(eval_limit)

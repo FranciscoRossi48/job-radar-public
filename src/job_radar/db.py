@@ -44,7 +44,7 @@ CREATE INDEX IF NOT EXISTS ix_jobs_first_seen ON jobs(first_seen);
 CREATE TABLE IF NOT EXISTS evaluations (
     id              INTEGER PRIMARY KEY AUTOINCREMENT,
     job_id          TEXT NOT NULL REFERENCES jobs(id),
-    evaluator       TEXT NOT NULL,             -- gemini | claude
+    evaluator       TEXT NOT NULL,             -- agentrouter | gemini | claude
     model           TEXT,
     prompt_version  TEXT,
     created_at      TEXT NOT NULL,
@@ -655,13 +655,14 @@ def backfill_dedup(conn: sqlite3.Connection, dd: DedupSettings) -> dict:
 
 
 def llm_usage(conn: sqlite3.Connection, days: int = 30) -> list[sqlite3.Row]:
-    """Requests y tokens por día y modelo (para controlar el gasto)."""
+    """Requests y tokens por día, proveedor y modelo (para controlar el gasto)."""
     cutoff = (datetime.now(UTC) - timedelta(days=days)).isoformat(timespec="seconds")
     return conn.execute(
-        """SELECT date(ts, 'localtime') AS day, model, COUNT(*) AS requests, SUM(ok) AS ok,
+        """SELECT date(ts, 'localtime') AS day, provider, model,
+                  COUNT(*) AS requests, SUM(ok) AS ok,
                   COALESCE(SUM(tokens_in), 0) AS tokens_in,
                   COALESCE(SUM(tokens_out), 0) AS tokens_out
-           FROM llm_calls WHERE ts >= ? GROUP BY 1, 2 ORDER BY 1 DESC, 2""",
+           FROM llm_calls WHERE ts >= ? GROUP BY 1, 2, 3 ORDER BY 1 DESC, 2, 3""",
         (cutoff,),
     ).fetchall()
 

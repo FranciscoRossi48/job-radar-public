@@ -48,7 +48,7 @@ class PrefilterResult(BaseModel):
     snippets: list[Snippet] = Field(default_factory=list)
 
 
-# --- Schema de evaluación (compartido por Gemini y Claude) ---------------------------------
+# --- Schema de evaluación (compartido por AgentRouter, Gemini y Claude) ---------------------
 
 RATIONALE_MAX_WORDS = 25
 
