@@ -80,6 +80,9 @@ class AppSettings(BaseModel):
 
 class Profile(BaseModel):
     summary: str
+    current_title: str | None = None
+    years_experience: float | None = Field(default=None, ge=0, le=60)
+    domains: list[str] = Field(default_factory=list)
     languages: dict[str, str] = Field(default_factory=dict)
     residency_countries: list[str] = Field(default_factory=list)
     stack: list[str] = Field(default_factory=list)
@@ -243,6 +246,8 @@ class HardExclusions(BaseModel):
     lang_above_profile: bool = True
     residency: bool = True
     seniority_junior: bool = True
+    seniority_above_profile: bool = False
+    no_cv_stack_match: bool = False
     security_clearance: bool = True
     security_clearance_pattern: str | None = None
     security_clearance_negation: str | None = None
@@ -286,7 +291,37 @@ class ScoringConfig(BaseModel):
     penalties: Penalties = Field(default_factory=Penalties)
     bonus: Bonus = Field(default_factory=Bonus)
     threshold: float = 75
-    evaluator_priority: list[str] = Field(default_factory=lambda: ["claude", "gemini"])
+    evaluator_priority: list[str] = Field(
+        default_factory=lambda: ["claude", "agentrouter", "gemini"]
+    )
+
+
+class AgentRouterModel(BaseModel):
+    name: str
+    rpm: int = 30
+    # Tope local para limitar gasto; AgentRouter puede aplicar además sus propios límites.
+    rpd: int = 300
+
+
+class AgentRouterSettings(BaseModel):
+    base_url: str = "https://agentrouter.org/v1"
+    models: list[AgentRouterModel] = Field(
+        default_factory=lambda: [AgentRouterModel(name="gpt-6.1-sol")]
+    )
+    max_jobs_per_run: int = 150
+    max_retries: int = 4
+    unavailable_after: int = 2
+    last_model_retries: int = 6
+    backoff_base_s: float = 15
+    backoff_max_s: float = 120
+    request_timeout_s: float = 120
+    # Transporte vía Codex CLI, la integración aprobada por AgentRouter. Se usa un CODEX_HOME
+    # temporal, así que no toca la configuración real del usuario.
+    codex_bin: str = "codex"
+    codex_timeout_s: float = 300
+    codex_max_retries: int = 2
+    # Cada llamada gasta ~11k-14k tokens de entrada por el contexto de Codex: mantenerlo bajo.
+    codex_max_jobs_per_run: int = 25
 
 
 class GeminiModel(BaseModel):
@@ -320,6 +355,8 @@ class GeminiSettings(BaseModel):
 class LlmConfig(BaseModel):
     prompt_version: str = "v2"
     rubric_path: str = "prompts/rubric_v2.md"
+    provider: Literal["agentrouter_codex", "agentrouter", "gemini"] = "agentrouter_codex"
+    agentrouter: AgentRouterSettings = Field(default_factory=AgentRouterSettings)
     gemini: GeminiSettings = Field(default_factory=GeminiSettings)
 
 

@@ -75,6 +75,40 @@ def test_junior_excluded(cfg):
     assert _run(case, cfg).exclusion_reasons == ["junior"]
 
 
+def test_no_cv_stack_match_can_be_a_hard_exclusion(cfg):
+    case = json.loads(json.dumps(_case("german_nice_to_have")))
+    case["features"]["stack_match"] = []
+    hard = cfg.scoring.hard_exclusions.model_copy(update={"no_cv_stack_match": True})
+    scoring = cfg.scoring.model_copy(update={"hard_exclusions": hard})
+    features = EvaluationFeatures(**case["features"])
+    context = JobContext(
+        location=case["job"]["location"],
+        country=case["job"]["country"],
+        text="Lead a reporting team using tools not listed in the profile.",
+        title=case["job"]["title"],
+    )
+    result = score(features, context, cfg.profile, scoring)
+    assert result.score == 0 and result.exclusion_reasons == ["no CV skill match"]
+
+
+def test_cv_experience_excludes_roles_clearly_above_candidate_seniority(cfg):
+    case = json.loads(json.dumps(_case("german_nice_to_have")))
+    case["features"]["seniority"] = "senior"
+    profile = cfg.profile.model_copy(update={"years_experience": 1.6})
+    hard = cfg.scoring.hard_exclusions.model_copy(update={"seniority_above_profile": True})
+    scoring = cfg.scoring.model_copy(update={"hard_exclusions": hard})
+    features = EvaluationFeatures(**case["features"])
+    context = JobContext(
+        location=case["job"]["location"],
+        country=case["job"]["country"],
+        text=case["job"]["description"],
+        title=case["job"]["title"],
+    )
+    result = score(features, context, profile, scoring)
+    assert result.score == 0
+    assert any("seniority senior" in reason for reason in result.exclusion_reasons)
+
+
 def test_security_clearance_excluded(cfg):
     case = json.loads(json.dumps(_case("dutch_is_a_plus_onsite")))
     case["features"]["red_flags"] = ["security clearance required"]

@@ -27,7 +27,9 @@ def ingest(
         None, "--source", "-s", help="Ej: linkedin, swissdevjobs, ats, greenhouse:getyourguide"
     ),
     query: list[str] = typer.Option(None, "--query", "-q", help="Reemplaza las queries del YAML"),
-    country: list[str] = typer.Option(None, "--country", "-c", help="Filtra países: CH, NL, LU"),
+    country: list[str] = typer.Option(
+        None, "--country", "-c", help="Filtra países por código ISO-2 (ej. CH, DE)"
+    ),
     limit: int = typer.Option(None, "--limit", help="results_wanted por llamada"),
     companies: Path = typer.Option(None, "--companies", help="companies.yaml alternativo"),
     verbose: bool = False,
@@ -59,12 +61,12 @@ def evaluate(
     limit: int = typer.Option(None, "--limit", "-n", help="Máximo de jobs a evaluar"),
     verbose: bool = False,
 ):
-    """Evalúa jobs pendientes con Gemini y calcula el score."""
-    from job_radar.evaluate_gemini import GeminiEvaluator
+    """Evalúa jobs pendientes con el LLM configurado y calcula el score."""
+    from job_radar.evaluate import build_evaluator
 
     cfg = load_config()
     setup_logging(cfg, verbose)
-    summary = GeminiEvaluator(cfg, db.connect(cfg.db_path)).run(limit)
+    summary = build_evaluator(cfg, db.connect(cfg.db_path)).run(limit)
     log.info("evaluate", extra={"evaluate_summary": summary})
     _echo(summary)
 
@@ -108,7 +110,7 @@ def export(
 @app.command("run-daily")
 def run_daily(
     skip_ingest: bool = typer.Option(False, help="No ingestar (solo evaluar y exportar)"),
-    skip_evaluate: bool = typer.Option(False, help="No llamar a Gemini"),
+    skip_evaluate: bool = typer.Option(False, help="No llamar al LLM"),
     eval_limit: int = typer.Option(None, "--eval-limit", help="Máximo de jobs a evaluar"),
     log_console: bool = typer.Option(
         True, help="Logs también por consola (launchd usa --no-log-console: solo archivo rotado)"
@@ -212,18 +214,63 @@ def applications():
 
 @app.command()
 def usage(days: int = typer.Option(7, help="Días hacia atrás")):
-    """Requests y tokens de Gemini por día y modelo (para controlar el gasto)."""
+    """Requests y tokens del LLM por día, proveedor y modelo."""
     cfg = load_config()
     rows = db.llm_usage(db.connect(cfg.db_path), days)
     typer.echo(
-        f"{'día':10}  {'modelo':24} {'req':>5} {'ok':>5} {'tokens in':>10} {'tokens out':>10}"
+        f"{'día':10}  {'proveedor':12} {'modelo':24} {'req':>5} {'ok':>5} "
+        f"{'tokens in':>10} {'tokens out':>10}"
     )
     for r in rows:
         typer.echo(
-            f"{r['day']:10}  {r['model']:24} {r['requests']:>5} {r['ok']:>5} "
+            f"{r['day']:10}  {r['provider']:12} {r['model']:24} "
+            f"{r['requests']:>5} {r['ok']:>5} "
             f"{r['tokens_in']:>10,} {r['tokens_out']:>10,}"
         )
-    typer.echo("Costo real: https://aistudio.google.com/usage (o la consola de Google Cloud).")
+    typer.echo("Costo real: revisá el panel del proveedor configurado.")
+
+
+@app.command()
+def web(
+    host: str = typer.Option("127.0.0.1", help="Host local donde escuchar"),
+    port: int = typer.Option(8000, min=1, max=65535, help="Puerto local"),
+    reload: bool = typer.Option(False, help="Recarga automática del backend (desarrollo)"),
+    open_browser: bool = typer.Option(True, "--open/--no-open", help="Abrir el navegador"),
+    verbose: bool = False,
+):
+    """Abre el dashboard web local de job-radar."""
+    import ipaddress
+    import threading
+    import webbrowser
+
+    import uvicorn
+
+    cfg = load_config()
+    setup_logging(cfg, verbose)
+    if not (cfg.root / "frontend" / "dist" / "index.html").is_file():
+        typer.secho("React dashboard not built yet.", fg=typer.colors.YELLOW)
+        typer.echo("Run: npm --prefix frontend ci && npm --prefix frontend run build")
+        raise typer.Exit(code=1)
+    try:
+        is_loopback = ipaddress.ip_address(host).is_loopback
+    except ValueError:
+        is_loopback = host == "localhost"
+    if not is_loopback:
+        typer.secho(
+            "Warning: the web UI has no authentication. Prefer --host 127.0.0.1.",
+            fg=typer.colors.YELLOW,
+        )
+    url = f"http://{host if host not in {'0.0.0.0', '::'} else '127.0.0.1'}:{port}"
+    typer.echo(f"job-radar web: {url}")
+    if open_browser and not reload:
+        threading.Timer(0.8, lambda: webbrowser.open(url)).start()
+    uvicorn.run(
+        "job_radar.web.app:app",
+        host=host,
+        port=port,
+        reload=reload,
+        log_level="info" if verbose else "warning",
+    )
 
 
 @app.command("mcp-config")

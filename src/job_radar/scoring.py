@@ -96,6 +96,11 @@ def score(
     hx, pen, bon = cfg.hard_exclusions, cfg.penalties, cfg.bonus
     out: list[dict] = []
     excluded: list[str] = []
+    # Unión de lo que extrajo el LLM y lo que aparece literalmente en el aviso. Se calcula antes
+    # de las exclusiones porque un perfil generado desde el CV puede exigir al menos un match.
+    canon = {technology.lower(): technology for technology in profile.stack}
+    from_llm = {canon[item.lower()] for item in f.stack_match if item.lower() in canon}
+    matched = sorted(from_llm | stack_in_text(job.text, profile), key=str.lower)
 
     # --- Exclusiones duras ---
     for req in f.lang_required:
@@ -127,6 +132,24 @@ def score(
         excluded.append(f"residency required: {f.residency_country or 'unspecified'}")
     if hx.seniority_junior and f.seniority == Seniority.junior:
         excluded.append("junior")
+    required_years = {
+        Seniority.junior: 0,
+        Seniority.mid: 2,
+        Seniority.senior: 5,
+        Seniority.lead: 7,
+        Seniority.unknown: 0,
+    }[f.seniority]
+    if (
+        hx.seniority_above_profile
+        and profile.years_experience is not None
+        and required_years > profile.years_experience + 1
+    ):
+        excluded.append(
+            f"seniority {f.seniority.value} requires ~{required_years}y "
+            f"(CV: {profile.years_experience:g}y)"
+        )
+    if hx.no_cv_stack_match and not matched:
+        excluded.append("no CV skill match")
     if (
         hx.security_clearance
         and hx.security_clearance_pattern
@@ -170,11 +193,6 @@ def score(
         )
 
     # --- Bonus ---
-    # Unión de lo que extrajo el LLM y lo que aparece literalmente en el aviso. El nombre
-    # canónico es el del perfil (así "bigquery" del LLM y "BigQuery" del texto cuentan una vez).
-    canon = {t.lower(): t for t in profile.stack}
-    from_llm = {canon[s.lower()] for s in f.stack_match if s.lower() in canon}
-    matched = sorted(from_llm | stack_in_text(job.text, profile), key=str.lower)
     if matched:
         pts = min(bon.stack_match_per_item * len(matched), bon.stack_match_max)
         out.append({"rule": f"stack: {', '.join(matched)}", "points": pts})

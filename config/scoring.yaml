@@ -8,6 +8,10 @@ hard_exclusions:
   # residency_hard_req=true y el país no está en profile.residency_countries.
   residency: true
   seniority_junior: true
+  # CV importer enables these two when the user approves a generated profile. Keeping them
+  # false preserves the sample profile's existing behavior until then.
+  seniority_above_profile: false
+  no_cv_stack_match: false
   # Habilitación de seguridad (OTAN/defensa/gobierno): requiere ciudadanía o años de residencia.
   security_clearance: true
   security_clearance_pattern: '(?i)\b(?:security\s+clearance|(?:nato|eu|national)\s+(?:secret|cosmic|confidential)\b|vgb-[ab]\b|habilitation\s+(?:de\s+s[eé]curit[eé]|secret)|sicherheits(?:über)?prüfung\s+psp)'

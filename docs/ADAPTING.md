@@ -23,26 +23,37 @@ Open `.env` and paste the key into `GEMINI_API_KEY=`.
 
 ## 2. Your profile: `config/profile.yaml`
 
-This is all the LLM knows about you, so don't paste your whole CV.
+This is all normal job evaluation knows about you, so don't paste your whole CV into the YAML.
+You can fill it manually or run the local dashboard (`uv run job-radar web`) and use **Settings →
+Build your profile from your CV**. The importer extracts PDF/DOCX/TXT text in memory, redacts
+contact details, asks before sending the text to the selected provider, and lets you review every
+field before replacing this file. The original CV is never stored.
 
 - `summary`: 4 or 5 lines covering your role, years of experience, industry, citizenship or work
   permit, and what you're looking for.
+- `current_title`, `years_experience`, and `domains`: structured CV facts used to prevent
+  senior/lead vacancies from outranking realistic early-career matches.
 - `languages`: your languages with their CEFR level (`en: C1`, `de: B1`...). A language that
   isn't listed counts as "none", so an ad that requires it is excluded.
 - `residency_countries`: the countries you already live in. With this set, an ad that says
   "must currently live in X" no longer excludes you.
 - `stack` and `stack_aliases`: your technologies. Each one that appears in an ad adds points.
 
+When a CV profile is approved, the dashboard enables `no_cv_stack_match` and
+`seniority_above_profile` in `scoring.yaml`. A role with no matching CV skill, or seniority
+clearly above `years_experience`, receives score 0. The dashboard immediately rescores existing
+evaluations and asks for a separate confirmation before evaluating all remaining jobs.
+
 The tests use the languages and stack from the sample profile. If you change the profile, some
 scoring tests may fail: adjust them, or check what each one expects.
 
-## 3. The rubric: `prompts/rubric_v2.md`
+## 3. The rubric: `prompts/rubric_v3.md`
 
-Near the top there's a `Key facts:` line with the sample candidate's citizenship and languages.
-Replace it with yours. If you change something substantial (what counts as a residency
-requirement, how languages are tagged), copy the file to `rubric_v3.md` and update
-`prompt_version` and `rubric_path` in `config/llm.yaml`. That way each evaluation stays linked
-to the rubric version that produced it.
+Candidate facts no longer live in the rubric: `profile.yaml` (manual or CV-generated) is the
+single source of truth. If you change something substantial in the extraction rules (what counts
+as a residency requirement, how languages are tagged), copy the file to a new version and update
+`prompt_version` and `rubric_path` in `config/llm.yaml`. That way each evaluation stays linked to
+the rubric version that produced it.
 
 ## 4. What and where to search: `config/searches.yaml`
 

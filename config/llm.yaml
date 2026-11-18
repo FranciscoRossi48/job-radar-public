@@ -1,6 +1,34 @@
 # v2: español como idioma propio (`es`), antes caía en `other` y excluía avisos que lo piden.
-prompt_version: v2
-rubric_path: prompts/rubric_v2.md
+prompt_version: v3
+rubric_path: prompts/rubric_v3.md
+
+# Evaluador por defecto. `gemini` mantiene el comportamiento original; `agentrouter_codex`
+# usa Codex CLI (cliente aprobado por AgentRouter) con salida estructurada; `agentrouter`
+# usa HTTP directo, que AgentRouter rechaza hoy con "unauthorized client detected".
+provider: gemini
+
+agentrouter:
+  base_url: https://agentrouter.org/v1
+  # Cadena de modelos, en orden de preferencia. Los ids disponibles cambian con el tiempo;
+  # verificarlos en el panel de AgentRouter antes de agregar otro.
+  models:
+    - name: gpt-6.1-sol
+      rpm: 30
+      rpd: 300
+  max_jobs_per_run: 150
+  request_timeout_s: 120
+  max_retries: 4
+  unavailable_after: 2
+  last_model_retries: 6
+  backoff_base_s: 15
+  backoff_max_s: 120
+  # Codex CLI: transporte aprobado por AgentRouter. Usa un CODEX_HOME temporal y no toca tu
+  # configuración real. Cada llamada gasta ~11k-14k tokens de entrada, así que el tope por
+  # corrida es bajo a propósito.
+  codex_bin: codex
+  codex_timeout_s: 300
+  codex_max_retries: 2
+  codex_max_jobs_per_run: 25
 
 gemini:
   # Cadena de modelos, en orden de preferencia. Si un modelo agota su cuota diaria, está

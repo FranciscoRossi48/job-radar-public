@@ -20,7 +20,7 @@ from pydantic import ValidationError
 
 from job_radar import db
 from job_radar.config import Config, load_config
-from job_radar.evaluate_gemini import profile_brief
+from job_radar.evaluate_common import profile_brief
 from job_radar.models import Evaluation
 from job_radar.scoring import JobContext, score
 
@@ -36,7 +36,7 @@ WORKFLOW = """
    the score; you do not. The response lists which items failed validation and why: fix only
    those and call `save_evaluations` again with them.
 4. Then summarize for the user, in Spanish: the jobs worth applying to and why, and where you
-   disagree with Gemini's previous evaluation (if any).
+   disagree with the automated evaluator's previous evaluation (if any).
 """
 
 
